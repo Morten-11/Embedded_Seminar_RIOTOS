@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: 2020 HAW Hamburg
+# SPDX-License-Identifier: LGPL-2.1-only
+
+# Include CPU specific configurations
+if USEMODULE_PERIPH_TIMER
+menu "timer peripheral driver"
+
+osource "$(RIOTCPU)/$(CPU)/periph/Kconfig.timer"
+
+endmenu # timer peripheral driver
+endif # USEMODULE_PERIPH_TIMER

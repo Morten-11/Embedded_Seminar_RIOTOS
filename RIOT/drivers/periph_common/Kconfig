@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: 2020 HAW Hamburg
+# SPDX-License-Identifier: LGPL-2.1-only
+
+rsource "Kconfig.gpio"
+
+rsource "Kconfig.i2c"
+
+rsource "Kconfig.rtc"
+
+rsource "Kconfig.spi"
+
+rsource "Kconfig.timer"
+
+rsource "Kconfig.vbat"
+rsource "Kconfig.wdt"

@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2020 Freie Universität Berlin
+# SPDX-FileCopyrightText: 2021 HAW Hamburg
+# SPDX-License-Identifier: LGPL-2.1-only
+
+menu "PN532 driver"
+    depends on USEMODULE_PN532
+
+config PN532_BUFFER_LEN
+    int "Internal buffer size"
+    default 64
+    help
+        The internal buffer is used while reading and writing to PN532 Device.
+        For large NDEF files, the buffer size may be increased.
+        Otherwise the files may be written in chunks.
+
+endmenu # PN532 driver

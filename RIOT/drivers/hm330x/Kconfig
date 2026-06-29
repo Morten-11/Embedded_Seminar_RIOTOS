@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: 2021 Inria
+# SPDX-License-Identifier: LGPL-2.1-only
+
+menu "HM330X driver"
+    depends on USEMODULE_HM330X
+
+config HM330X_INDOOR_ENVIRONMENT
+    bool "Indoor environment calibration"
+    default 500
+    help
+        The HM330X sensor outputs two set of PM* values, one calibrated for indoor
+        environment and another one for atmospheric environment, set this value
+        according to your deployment.
+
+endmenu # HM330X driver

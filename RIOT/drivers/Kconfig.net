@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2020 HAW Hamburg
+# SPDX-License-Identifier: LGPL-2.1-only
+
+menu "Network Device Drivers"
+
+rsource "netdev/Kconfig"
+
+rsource "at86rf215/Kconfig"
+rsource "cc110x/Kconfig"
+rsource "$(RIOTCPU)/nrf5x_common/radio/Kconfig.nrf5x"
+rsource "dose/Kconfig"
+rsource "mrf24j40/Kconfig"
+rsource "pn532/Kconfig"
+rsource "rn2xx3/Kconfig"
+rsource "slipdev/Kconfig"
+endmenu # Network Device Drivers

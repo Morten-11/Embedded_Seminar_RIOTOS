@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: 2020 HAW Hamburg
+# SPDX-License-Identifier: LGPL-2.1-only
+
+if USEMODULE_PERIPH_GPIO
+
+# TODO: this module is actually jus  t an artifact from the way periph_init_%
+# modules are handled in Makefile. We need to define it to keep the list the
+# same for now. We should be able to remove it later on.
+
+endif # USEMODULE_PERIPH_GPIO
+
+osource "$(RIOTCPU)/$(CPU)/periph/Kconfig.gpio"

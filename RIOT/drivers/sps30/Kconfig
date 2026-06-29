@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2020 Freie Universität Berlin
+# SPDX-FileCopyrightText: 2021 HAW Hamburg
+# SPDX-License-Identifier: LGPL-2.1-only
+
+menu "SPS30 driver"
+    depends on USEMODULE_SPS30
+
+config SPS30_ERROR_RETRY
+    int "Maximum number of error retries"
+    default 500
+    help
+        Maximum number of automatic retries on communication errors.
+        Change this to 0 if more fine-grained feedback is required.
+        The value may be increased if the device is connected over
+        suboptimal wiring.
+
+endmenu # SPS30 driver

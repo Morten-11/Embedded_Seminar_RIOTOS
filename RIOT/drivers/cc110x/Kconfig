@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2020 Freie Universität Berlin
+# SPDX-License-Identifier: LGPL-2.1-only
+
+menu "CC110X driver"
+    depends on USEMODULE_CC110X
+
+config CC110X_DEFAULT_CHANNEL
+    int "Configure default channel"
+    range 0 7
+    default 0
+    help
+        Set the default channel for transmission from the allowed
+        maximum of 8 (0-7) Channels.
+        Default channel is 0.
+
+endmenu # CC110X driver

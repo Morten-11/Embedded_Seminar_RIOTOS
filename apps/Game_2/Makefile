@@ -1,0 +1,31 @@
+# name of your application
+APPLICATION = boxgame_v2
+
+# If no BOARD is found in the environment, use this default:
+BOARD ?= native
+
+# This has to be the absolute path to the RIOT base directory:
+RIOTBASE ?= $(CURDIR)/../../RIOT
+
+# Comment this out to disable code in RIOT that does safety checking
+# which is not needed in a production environment but helps in the
+# development process:
+DEVELHELP ?= 1
+
+# Change this to 0 show compiler invocation lines by default:
+QUIET ?= 1
+
+DRIVER ?= lsm6dsxx
+DRIVER += st77xx
+
+USEMODULE += $(DRIVER)
+USEMODULE += mineplex
+
+USEMODULE += vfs_default
+USEMODULE += ps
+
+ifeq (,$(filter native%,$(BOARD)))
+  CFLAGS += -DTHREAD_STACKSIZE_MAIN=2048
+endif
+
+include $(RIOTBASE)/Makefile.include

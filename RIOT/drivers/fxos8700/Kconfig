@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: 2020 Freie Universität Berlin
+# SPDX-FileCopyrightText: 2020 HAW Hamburg
+# SPDX-License-Identifier: LGPL-2.1-only
+
+menu "FXOS8700 driver"
+    depends on USEMODULE_FXOS8700
+
+config FXOS8700_USE_ACC_RAW_VALUES
+    bool "Enable raw ADC readings"
+    help
+        Enable this to return raw ADC readings.
+        By default measurements are converted to mg.
+
+endmenu # FXOS8700 driver

@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: 2020 HAW Hamburg
+# SPDX-License-Identifier: LGPL-2.1-only
+
+config WDT_WARNING_PERIOD
+    int "Warning period (in ms)"
+    depends on USEMODULE_PERIPH_WDT_WARNING_PERIOD
+    help
+        Period in ms before reboot where wdt_cb() is executed.

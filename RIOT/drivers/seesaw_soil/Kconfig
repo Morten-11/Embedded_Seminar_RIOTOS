@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2020 Viktor Gal
+# SPDX-FileCopyrightText: 2021 HAW Hamburg
+# SPDX-License-Identifier: LGPL-2.1-only
+
+menu "SEESAW_SOIL driver"
+    depends on USEMODULE_SEESAW_SOIL
+
+config SEESAW_SOIL_I2C_ADDRESS
+    hex "I2C default address"
+    range 0x36 0x39
+    default 0x36
+    help
+        SEESAW_SOIL allows for up to 4 devices on single bus. The value depends on
+        the state of AD1 and AD0 pins.
+
+endmenu # SEESAW_SOIL driver

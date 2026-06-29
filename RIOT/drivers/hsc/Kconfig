@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: 2020 Deutsches Zentrum für Luft- und Raumfahrt e.V. (DLR)
+# SPDX-License-Identifier: LGPL-2.1-only
+
+menu "HSC pressure and temperature sensor driver"
+    depends on USEMODULE_HSC
+
+config HSC_I2C_ADDRESS
+    hex "I2C address of the HSC pressure and temperature sensor"
+    range 0x28 0x98
+    default 0x28
+    help
+        The HSC sensors can have one of the following I2C addresses:
+        0x28, 0x38, 0x48, 0x58, 0x68, 0x78, 0x88, and 0x98
+
+config HSC_RANGE
+    int "Pressure range in millibar"
+    range 1 10000
+    default 40
+    help
+        The HSC sensors support a pressure range of 1.6 millibar to 10 bar,
+        depending on the model.
+
+endmenu # HSC pressure and temperature sensor driver

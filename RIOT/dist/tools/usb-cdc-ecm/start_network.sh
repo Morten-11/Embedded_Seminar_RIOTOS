@@ -1,0 +1,150 @@
+#!/usr/bin/env bash
+
+USB_CDC_ECM_DIR="$(dirname "$(readlink -f "$0")")"
+
+INTERFACE_CHECK_COUNTER=5  # 5 attempts to find usb interface
+
+# This address is assigned to the CDC-ECM interface of the host
+IPV6_LOCAL=${IPV6_LOCAL:-"fe80::1/64"}
+# This address is assigned to the host
+IPV6_GLOBAL=${IPV6_GLOBAL:-"fd00:dead:beef::1/128"}
+# This address should be assigned to the CDC-ECM interface of the border router
+IPV6_ROUTE_NEXT_HOP=${IPV6_ROUTE_NEXT_HOP:-"fe80::2"}
+
+find_interface() {
+    INTERFACE=$(ls -A /sys/bus/usb/drivers/cdc_ether/*/net/ 2>/dev/null)
+    INTERFACE_CHECK=$(echo -n "${INTERFACE}" | head -c1 | wc -c)
+    if [ "${INTERFACE_CHECK}" -eq 0 ] && [ ${INTERFACE_CHECK_COUNTER} != 0 ]; then
+        # We want to have multiple opportunities to find the USB interface
+        # as sometimes it can take a few seconds for it to enumerate after
+        # the device has been flashed.
+        sleep 1
+        ((INTERFACE_CHECK_COUNTER=INTERFACE_CHECK_COUNTER-1))
+        find_interface
+    fi
+    INTERFACE=${INTERFACE%/}
+}
+
+echo "Waiting for network interface."
+if [ -z "${INTERFACE}" ]; then
+    find_interface
+else
+    INTERFACE_CHECK=1
+fi
+
+if [ "${INTERFACE_CHECK}" -eq 0 ]; then
+    echo "Unable to find network interface"
+    exit 1
+else
+    echo "Found interface: ${INTERFACE}"
+fi
+
+setup_interface() {
+    sysctl -w net.ipv6.conf."${INTERFACE}".forwarding=1
+    sysctl -w net.ipv6.conf."${INTERFACE}".accept_ra=0
+    ip link set "${INTERFACE}" up
+    ip a a "${IPV6_LOCAL}" dev "${INTERFACE}"
+    ip a a "${IPV6_GLOBAL}" dev lo
+}
+
+cleanup_interface() {
+    ip route del "${PREFIX}" via "${IPV6_ROUTE_NEXT_HOP}" dev "${INTERFACE}"
+}
+
+stop_radvd() {
+    if [ -n "${RADVD_ADDR}" ]; then
+        ${RADVD} -d
+        ip a d "${RADVD_ADDR}" dev "${INTERFACE}"
+    fi
+}
+
+stop_dhcpdv6() {
+    if [ -n "${DHCPD_PIDFILE}" ]; then
+        kill "$(cat "${DHCPD_PIDFILE}")"
+        rm "${DHCPD_PIDFILE}"
+        ip route del "${PREFIX}" via "${IPV6_ROUTE_NEXT_HOP}" dev "${INTERFACE}"
+    fi
+}
+
+stop_uhcpd() {
+    if [ -n "${UHCPD_PID}" ]; then
+        kill "${UHCPD_PID}"
+        ip route del "${PREFIX}" via "${IPV6_ROUTE_NEXT_HOP}" dev "${INTERFACE}"
+    fi
+}
+
+cleanup() {
+    echo "Cleaning up..."
+    stop_radvd
+    stop_dhcpdv6
+    stop_uhcpd
+    cleanup_interface
+    trap "" INT QUIT TERM EXIT
+}
+
+start_uhcpd() {
+    ip route add "${PREFIX}" via "${IPV6_ROUTE_NEXT_HOP}" dev "${INTERFACE}"
+    ${UHCPD} "${INTERFACE}" "${PREFIX}" > /dev/null &
+    UHCPD_PID=$!
+}
+
+start_dhcpd() {
+    ip route add "${PREFIX}" via "${IPV6_ROUTE_NEXT_HOP}" dev "${INTERFACE}"
+    DHCPD_PIDFILE=$(mktemp)
+    ${DHCPD} -d -p "${DHCPD_PIDFILE}" "${INTERFACE}" "${PREFIX}" 2> /dev/null
+}
+
+start_radvd() {
+    RADVD_ADDR=$(echo "${PREFIX}" | sed -e 's/::\//::1\//')
+    ip a a "${RADVD_ADDR}" dev "${INTERFACE}"
+    sysctl net.ipv6.conf."${INTERFACE}".accept_ra=2
+    sysctl net.ipv6.conf."${INTERFACE}".accept_ra_rt_info_max_plen=64
+    ${RADVD} -c "${INTERFACE}" "${PREFIX}"
+}
+
+if [ "$1" = "-d" ] || [ "$1" = "--use-dhcpv6" ]; then
+    USE_DHCPV6=1
+    shift 1
+else
+    USE_DHCPV6=0
+fi
+
+if [ "$1" = "-r" ] || [ "$1" = "--use-radvd" ]; then
+    USE_RADVD=1
+    shift 1
+else
+    USE_RADVD=0
+fi
+
+PREFIX=$1
+[ -z "${PREFIX}" ] && {
+    echo "usage: $0 [-d|--use-dhcpv6] [-r|--use-radvd ] <prefix> [<serial-port>]"
+    exit 1
+}
+
+if [ -n "$2" ]; then
+    PORT=$2
+fi
+
+trap "cleanup" INT QUIT TERM EXIT
+
+setup_interface
+
+if [ ${USE_DHCPV6} -eq 1 ]; then
+    DHCPD="$(readlink -f "${USB_CDC_ECM_DIR}/../dhcpv6-pd_ia/")/dhcpv6-pd_ia.py"
+    start_dhcpd
+elif [ ${USE_RADVD} -eq 1 ]; then
+    RADVD="$(readlink -f "${USB_CDC_ECM_DIR}/../radvd/")/radvd.sh"
+    start_radvd
+else
+    UHCPD="$(readlink -f "${USB_CDC_ECM_DIR}/../uhcpd/bin")/uhcpd"
+    start_uhcpd
+fi
+
+if [ -z "${PORT}" ]; then
+    echo "Network enabled over CDC-ECM"
+    echo "Press Return to stop"
+    read -r
+else
+    "${USB_CDC_ECM_DIR}/../pyterm/pyterm" -p "${PORT}"
+fi

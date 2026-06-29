@@ -1,0 +1,3 @@
+MODULE = u8g2_csrc
+
+include $(RIOTBASE)/Makefile.base

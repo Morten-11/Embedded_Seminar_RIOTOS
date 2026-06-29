@@ -1,0 +1,6 @@
+# SPDX-FileCopyrightText: 2020 HAW Hamburg
+# SPDX-License-Identifier: LGPL-2.1-only
+
+rsource "Kconfig.st7735"
+rsource "Kconfig.st7789"
+rsource "Kconfig.st7796"

@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2020 HAW Hamburg
+# SPDX-License-Identifier: LGPL-2.1-only
+
+if USEMODULE_PERIPH_RTC
+
+endif #MODULE_PERIPH_RTC
+
+# TODO: this module is actually just an artifact from the way periph_init_%
+# modules are handled in Makefile. We need to define it to keep the list the
+# same for now. We should be able to remove it later on.
+
+# Include CPU specific configurations
+osource "$(RIOTCPU)/$(CPU)/periph/Kconfig.rtc"
